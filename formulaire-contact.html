@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact</title>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --ink: #1c1c1a;
+    --accent: #2f5d50;
+    --accent-light: #e7efec;
+    --border: #d8d5cd;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--ink);
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 36px 32px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: normal;
+    margin: 0 0 6px;
+  }
+  p.sub {
+    margin: 0 0 28px;
+    font-size: 14px;
+    color: #6b6a64;
+    font-family: Arial, sans-serif;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 6px;
+    color: #444;
+  }
+  input {
+    width: 100%;
+    padding: 11px 12px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    background: #fdfdfc;
+  }
+  input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.6; cursor: default; }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  #msg {
+    margin-top: 16px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  #msg.ok { color: var(--accent); }
+  #msg.err { color: #a13a3a; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Laissez vos coordonnées</h1>
+    <p class="sub">Nous vous recontactons rapidement.</p>
+    <form id="form">
+      <label for="nom">Nom</label>
+      <input id="nom" name="nom" type="text" required autocomplete="name">
+
+      <label for="tel">Téléphone</label>
+      <input id="tel" name="tel" type="tel" required autocomplete="tel" placeholder="06 12 34 56 78">
+
+      <button type="submit" id="submitBtn">Envoyer</button>
+      <div id="msg"></div>
+    </form>
+  </div>
+
+<script>
+  // ⚠️ À remplacer par tes propres valeurs (voir étapes de configuration) :
+  const BOT_TOKEN = "8999390854:AAH2PryyzstF8VfsIK5FfDUhQb4i88f8xAM";
+  const CHAT_ID = "id":5159507720";
+
+  const form = document.getElementById('form');
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    msg.className = '';
+    btn.disabled = true;
+    btn.textContent = 'Envoi...';
+
+    const nom = document.getElementById('nom').value.trim();
+    const tel = document.getElementById('tel').value.trim();
+    const text = `📩 Nouveau contact\nNom : ${nom}\nTéléphone : ${tel}`;
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.description || 'Erreur inconnue');
+
+      msg.textContent = 'Merci, votre message a bien été envoyé.';
+      msg.className = 'ok';
+      form.reset();
+    } catch (err) {
+      msg.textContent = "Une erreur est survenue. Réessayez.";
+      msg.className = 'err';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Envoyer';
+    }
+  });
+</script>
+</body>
+</html>
